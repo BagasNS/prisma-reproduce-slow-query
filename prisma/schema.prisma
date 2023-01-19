@@ -1,0 +1,61 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "./client"
+  previewFeatures = ["filteredRelationCount"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model accounts {
+  id_account String    @id @default(uuid())
+  full_name  String
+  calon      calon?
+  pemilih    pemilih?
+  surveyor   surveyor?
+}
+
+model calon {
+  id_calon   String     @id @default(uuid())
+  id_account String     @unique
+  account    accounts   @relation(fields: [id_account], references: [id_account])
+  dukungan   dukungan[]
+}
+
+model pemilih {
+  id_pemilih String     @id @default(uuid())
+  id_account String     @unique
+  dukungan   dukungan[]
+  account    accounts   @relation(fields: [id_account], references: [id_account])
+}
+
+model surveyor {
+  id_surveyor String     @id @default(uuid())
+  id_account  String     @unique
+  dukungan    dukungan[]
+  account     accounts   @relation(fields: [id_account], references: [id_account])
+}
+
+model dukungan {
+  id_dukungan    String        @id @default(uuid())
+  id_pemilih     String
+  id_surveyor    String
+  level_dukungan LevelDukungan
+  id_calon       String
+  created_at     DateTime      @default(now()) @db.Timestamptz(3)
+  updated_at     DateTime      @default(now()) @db.Timestamptz(3)
+  calon          calon         @relation(fields: [id_calon], references: [id_calon])
+  pemilih        pemilih       @relation(fields: [id_pemilih], references: [id_pemilih])
+  surveyor       surveyor      @relation(fields: [id_surveyor], references: [id_surveyor])
+
+  @@unique([id_pemilih, level_dukungan, id_calon])
+}
+
+enum LevelDukungan {
+  A
+  B
+  C
+  D
+}

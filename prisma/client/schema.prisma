@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["filteredRelationCount"]
+  output          = "./client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model accounts {
+  id_account        String           @id @default(uuid())
+  full_name         String
+  calon             calon?
+  surveyor          surveyor?
+  pemilih           pemilih?
+}
+
+model calon {
+  id_calon                 String                     @id @default(uuid())
+  id_account               String                     @unique
+  account                  accounts                   @relation(fields: [id_account], references: [id_account])
+  dukungan                 dukungan[]
+}
+
+model pemilih {
+  id_pemilih        String            @id @default(uuid())
+  id_account        String            @unique
+  account           accounts          @relation(fields: [id_account], references: [id_account])
+  dukungan          dukungan[]
+}
+
+model surveyor {
+  id_surveyor        String           @id @default(uuid())
+  id_account        String           @unique
+  account           accounts         @relation(fields: [id_account], references: [id_account])
+  dukungan          dukungan[]
+}
+
+model dukungan {
+  id_dukungan    String     @id @default(uuid())
+  id_pemilih     String
+  pemilih        pemilih    @relation(fields: [id_pemilih], references: [id_pemilih])
+  id_surveyor    String
+  surveyor       surveyor    @relation(fields: [id_surveyor], references: [id_surveyor])
+  level_dukungan LevelDukungan // enum
+  id_calon       String
+  calon          calon      @relation(fields: [id_calon], references: [id_calon])
+  created_at     DateTime   @default(now()) @db.Timestamptz(3)
+  updated_at     DateTime   @default(now()) @db.Timestamptz(3)
+
+  @@unique([id_pemilih, level_dukungan, id_calon])
+}
+
+enum LevelDukungan {
+  A
+  B
+  C
+  D
+} // Real Enum Has Been Replaced
